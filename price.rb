@@ -19,11 +19,32 @@ puts
 url = ''
 
 File.readlines('products', chomp: true).each do |line|
-  url, price = line.split(',')
-  print 'URL: ', url
+  product_url, saved_price = line.split(',')
+  saved_price = saved_price.to_f
+  print 'URL: ', product_url
   puts
-  print 'price: ', price
+  print 'Saved price: ', saved_price
   puts
+
+  # get current price
+  response = Faraday.get(product_url)
+  exit if not response.success?
+  puts 'Successfully fetched page'
+
+  html = response.body
+
+  re = /"price":"([0-9]+\.[0-9][0-9])"/
+  found = re.match(html)
+  current_price = $1.to_f
+  print 'Current price: ', current_price
+  puts
+  if current_price == saved_price
+    print '===== Same'
+  else
+    print '≠≠≠≠≠ Different'
+  end
+  puts
+
   puts
 end
 
